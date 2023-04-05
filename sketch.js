@@ -8,6 +8,8 @@ const play = 0
 const end = 1
 var gameState = play
 var gameOver, gameOverImg, restart, restartImg
+var jump, die, checkpoint
+var isDead = false
 
 //preload carrega as mídias do jogo
 function preload() {
@@ -25,6 +27,10 @@ function preload() {
   trexCollided = loadAnimation("./images/trex_collided.png")
   gameOverImg = loadImage("./images/gameOver.png")
   restartImg = loadImage("./images/restart.png")
+
+  jump = loadSound("./sounds/jump.mp3")
+  die = loadSound("./sounds/die.mp3")
+  checkpoint = loadSound("./sounds/checkPoint.mp3")
 }
 
 
@@ -76,15 +82,15 @@ function draw() {
 
     score = Math.round(frameCount / 1.7)
 
-    ground.velocityX = -8
+    ground.velocityX = -(3 + 3*score/100)
 
     if (ground.x < 0) {
       ground.x = ground.width / 2
     }
 
-    if (keyDown("space") && trex.y >= 164) {
+    if (keyDown("space") && trex.y >= 160) {
       trex.velocityY = -9
-
+      jump.play()
 
 
     }
@@ -92,13 +98,23 @@ function draw() {
     generateClouds()
 
     generateObs()
+
+    if(frameCount % 170 == 0) {
+      checkpoint.play()
+    }
   }
 
+ 
 
   if (trex.isTouching(obstaclesGroup)) {
     gameState = end
-
+    if(!isDead) {
+      die.play()
+      isDead = true
+    }
   }
+
+  
 
   console.log(frameCount)
 
@@ -111,6 +127,7 @@ function draw() {
     trex.changeAnimation("collided")
     obstaclesGroup.setLifetimeEach(-1)
     cloudsGroup.setLifetimeEach(-1)
+    
   }
   /////////////////////////////////////////////////////////////////////////// 
 
@@ -126,7 +143,7 @@ function generateClouds() {
 
   if (frameCount % 360 == 0) {
     var cloud = createSprite(650, 30, 20, 20)
-    cloud.velocityX = -1
+    cloud.velocityX = -(3 + 3*score/100)
     cloud.addImage(cloudImage)
     cloud.scale = random(0.3, 0.6)
     cloud.y = random(20, 60)
@@ -139,27 +156,27 @@ function generateClouds() {
 function generateObs() {
   if (frameCount % 75 == 0) {
     var cactus = createSprite(650, 170, 20, 20)
-    cactus.velocityX = -8
+    cactus.velocityX = -(4 + 3*score/100)
     obstaclesGroup.add(cactus)
     var rand = Math.round(random(1, 6))
     switch (rand) {
       case 1: cactus.addImage(c1)
-        cactus.scale = 0.7
-        break
-      case 2: cactus.addImage(c2)
-        cactus.scale = 0.6
-        break
-      case 3: cactus.addImage(c3)
         cactus.scale = 0.65
         break
-      case 4: cactus.addImage(c4)
-        cactus.scale = 0.5
+      case 2: cactus.addImage(c2)
+        cactus.scale = 0.55
         break
-      case 5: cactus.addImage(c5)
+      case 3: cactus.addImage(c3)
+        cactus.scale = 0.60
+        break
+      case 4: cactus.addImage(c4)
         cactus.scale = 0.45
         break
-      case 6: cactus.addImage(c6)
+      case 5: cactus.addImage(c5)
         cactus.scale = 0.4
+        break
+      case 6: cactus.addImage(c6)
+        cactus.scale = 0.35
         break
       default: break
     }
