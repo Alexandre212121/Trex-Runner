@@ -3,13 +3,14 @@ var trex, trexRunning, trexCollided
 var ground, groundImage
 var cloudImage, cloudsGroup
 var c1, c2, c3, c4, c5, c6, obstaclesGroup
-var score = 0
+var score = 1
 const play = 0
 const end = 1
 var gameState = play
 var gameOver, gameOverImg, restart, restartImg
 var jump, die, checkpoint
 var isDead = false
+var highscore = 0
 
 //preload carrega as mídias do jogo
 function preload() {
@@ -50,7 +51,7 @@ function setup() {
   ground = createSprite(300, 190, 600, 20)
   ground.depth = trex.depth - 1
   ground.addImage("ground", groundImage)
-  invisibleGround = createSprite(200, 195, 400, 10)
+  invisibleGround = createSprite(200, 200, 400, 10)
   invisibleGround.visible = false
 
   cloudsGroup = new Group()
@@ -73,16 +74,19 @@ function setup() {
 //draw faz o movimento, a ação do jogo
 function draw() {
   background(190)
-  text("Score: " + score, 500, 25)
+  text("SCORE: " + score, 500, 25)
+  text("HI: " + highscore, 450, 25)
   trex.velocityY += 0.7
   trex.collide(invisibleGround)
+
+  //console.log(getFrameRate)
 
 
   if (gameState == play) {
 
-    score = Math.round(frameCount / 1.7)
+    score = score + Math.round(getFrameRate() / 59.955)
 
-    ground.velocityX = -(3 + 3*score/100)
+    ground.velocityX = -(8 + 8*score/1000)
 
     if (ground.x < 0) {
       ground.x = ground.width / 2
@@ -99,7 +103,7 @@ function draw() {
 
     generateObs()
 
-    if(frameCount % 170 == 0) {
+    if(score % 100 == 0) {
       checkpoint.play()
     }
   }
@@ -116,7 +120,7 @@ function draw() {
 
   
 
-  console.log(frameCount)
+  //console.log(frameCount)
 
   if (gameState == end) {
     ground.velocityX = 0
@@ -128,6 +132,15 @@ function draw() {
     obstaclesGroup.setLifetimeEach(-1)
     cloudsGroup.setLifetimeEach(-1)
     
+
+    if(mousePressedOver(restart)) {
+      reset()
+      
+    }
+
+    if(score >= highscore) {
+      highscore = score
+    }
   }
   /////////////////////////////////////////////////////////////////////////// 
 
@@ -143,7 +156,7 @@ function generateClouds() {
 
   if (frameCount % 360 == 0) {
     var cloud = createSprite(650, 30, 20, 20)
-    cloud.velocityX = -(3 + 3*score/100)
+    cloud.velocityX = -(2 + 2*score/1000)
     cloud.addImage(cloudImage)
     cloud.scale = random(0.3, 0.6)
     cloud.y = random(20, 60)
@@ -156,31 +169,43 @@ function generateClouds() {
 function generateObs() {
   if (frameCount % 75 == 0) {
     var cactus = createSprite(650, 170, 20, 20)
-    cactus.velocityX = -(4 + 3*score/100)
+    cactus.velocityX = -(8 + 8*score/1000)
     obstaclesGroup.add(cactus)
     var rand = Math.round(random(1, 6))
     switch (rand) {
       case 1: cactus.addImage(c1)
-        cactus.scale = 0.65
+        cactus.scale = 0.7
         break
       case 2: cactus.addImage(c2)
-        cactus.scale = 0.55
+        cactus.scale = 0.6
         break
       case 3: cactus.addImage(c3)
-        cactus.scale = 0.60
+        cactus.scale = 0.65
         break
       case 4: cactus.addImage(c4)
-        cactus.scale = 0.45
+        cactus.scale = 0.5
         break
       case 5: cactus.addImage(c5)
-        cactus.scale = 0.4
+        cactus.scale = 0.45
         break
       case 6: cactus.addImage(c6)
-        cactus.scale = 0.35
+        cactus.scale = 0.4
         break
       default: break
     }
     //cactus.scale = 0.4
     cactus.lifetime = 200
   }
+}
+
+function reset() {
+  gameState = play
+  obstaclesGroup.destroyEach()
+  cloudsGroup.destroyEach()
+  trex.changeAnimation("running")
+  gameOver.visible = false
+  restart.visible = false
+  score = 1
+ 
+  
 }
