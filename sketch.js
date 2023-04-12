@@ -37,10 +37,10 @@ function preload() {
 
 //setup faz a configuração
 function setup() {
-  createCanvas(600, 200)
+  createCanvas(windowWidth, windowHeight)
 
   //sprite trex
-  trex = createSprite(50, 160, 20, 50)
+  trex = createSprite(50, height-40, 20, 50)
   //adcionando animação ao trex
   trex.addAnimation("running", trexRunning)
   trex.addAnimation("collided", trexCollided)
@@ -48,21 +48,21 @@ function setup() {
   //trex.debug = true
   trex.setCollider("rectangle", 0, 0, 50, 100, 40 )
     //sprite Solo
-  ground = createSprite(300, 190, 600, 20)
+  ground = createSprite(width/2, height-30, width, 20)
   ground.depth = trex.depth - 1
   ground.addImage("ground", groundImage)
-  invisibleGround = createSprite(200, 200, 400, 10)
+  invisibleGround = createSprite(width/2, height-20, width, 10)
   invisibleGround.visible = false
 
   cloudsGroup = new Group()
   obstaclesGroup = new Group()
 
-  gameOver = createSprite(300, 80, 50, 50)
+  gameOver = createSprite(width/2, height/2 - 20, 50, 50)
   gameOver.visible = false
   gameOver.addImage(gameOverImg)
   gameOver.scale = 0.7
 
-  restart = createSprite(300, 120, 50, 50)
+  restart = createSprite(width/2, height/2 + 50, 50, 50)
   restart.addImage(restartImg)
   restart.visible = false
   restart.scale = 0.5
@@ -74,8 +74,9 @@ function setup() {
 //draw faz o movimento, a ação do jogo
 function draw() {
   background(190)
-  text("SCORE: " + score, 500, 25)
-  text("HI: " + highscore, 450, 25)
+  
+  text("SCORE: " + score, width-100, 25)
+  text("HI: " + highscore, width-150, 25)
   trex.velocityY += 0.7
   trex.collide(invisibleGround)
 
@@ -92,9 +93,10 @@ function draw() {
       ground.x = ground.width / 2
     }
 
-    if (keyDown("space") && trex.y >= 160) {
+    if ((keyDown("space") || touches.length > 0) && trex.y >= height-50) {
       trex.velocityY = -9
       jump.play()
+      touches = []
 
 
     }
@@ -133,9 +135,9 @@ function draw() {
     cloudsGroup.setLifetimeEach(-1)
     
 
-    if(mousePressedOver(restart)) {
+    if(mousePressedOver(restart) || touches.lenght > 0) {
       reset()
-      
+      touches = []
     }
 
     if(score >= highscore) {
@@ -155,20 +157,20 @@ function generateClouds() {
 
 
   if (frameCount % 360 == 0) {
-    var cloud = createSprite(650, 30, 20, 20)
+    var cloud = createSprite(width+50, height-170, 20, 20)
     cloud.velocityX = -(2 + 2*score/1000)
     cloud.addImage(cloudImage)
     cloud.scale = random(0.3, 0.6)
-    cloud.y = random(20, 60)
+    cloud.y = random(height-250, height-300)
     cloud.depth = trex.depth - 1
-    cloud.lifetime = 700
+    cloud.lifetime = width/cloud.velocityX
     cloudsGroup.add(cloud)
 
   }
 }
 function generateObs() {
   if (frameCount % 75 == 0) {
-    var cactus = createSprite(650, 170, 20, 20)
+    var cactus = createSprite(width+50, height-50, 20, 20)
     cactus.velocityX = -(8 + 8*score/1000)
     obstaclesGroup.add(cactus)
     var rand = Math.round(random(1, 6))
@@ -194,7 +196,7 @@ function generateObs() {
       default: break
     }
     //cactus.scale = 0.4
-    cactus.lifetime = 200
+    cactus.lifetime = width/cactus.velocityX
   }
 }
 
